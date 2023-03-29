@@ -1,4 +1,5 @@
-from api import PetFriends, log_api
+
+from api import PetFriends
 from settings import valid_email, valid_password
 import os
 import pytest
@@ -220,8 +221,8 @@ class TestPetFriends:
     @pytest.mark.api
     @pytest.mark.manipulations_with_pets
     def test_add_new_pet_with_huge_values(self,
-            name='БарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскинБарбоскин',
-            animal_type='двортерьердвортерьердвортерьердвортерьердвортерьердвортерьердвортерьердвортерьердвортерьердвортерьердвортерьердвортерьердвортерьердвортерьердвортерьердвортерьердвортерьердвортерьердвортерьердвортерьердвортерьердвортерьер',
+            name='BarboskinBarboskinBarboskinBarboskinBarboskinBarboskinBarboskinBarboskinBarboskinBarboskinBarboskinBarboskinBarboskinBarboskinBarboskinBarboskinBarboskinBarboskinBarboskinBarboskinBarboskinBarboskinBarboskinBarboskinBarboskinBarbos',
+            animal_type='DvorterierDvorterierDvorterierDvorterierDvorterierDvorterierDvorterierDvorterierDvorterierDvorterierDvorterierDvorterierDvorterierDvorterierDvorterierDvorterierDvorterierDvorterierDvorterierDvorterierDvorterierDvorterierDvor',
             age='999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999',
             pet_photo='images/00013.png'):
         """Проверяем что можно добавить питомца с слишком большими данными"""

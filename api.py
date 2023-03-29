@@ -1,31 +1,57 @@
 
 import json
-from settings import valid_email, valid_password
 import requests
-from requests_toolbelt.multipart.encoder import MultipartEncoder
-import logging
 import functools
 
+# Этот декоратор в целом хорош. он будет выдавать параметры реквеста, если переписать методы так,
+# Чтобы все параметры, включая урл задавались в качестве аргументов функции. возможно к этому я еще вернусь,
+# Главное - понял :)
 
 def log_api(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
+        # url = kwargs.get('url', {})
+        # headers = kwargs.get('headers', {})
+        # data = kwargs.get('data', {})
+        # params = kwargs.get('params', {})
+        #
+        # # Log request information
+        # with open('log.txt', 'a') as f:
+        #     f.write(f'\n--- Request ---\n')
+        #     if url:
+        #         f.write(f'\nUrl: {url}')
+        #     if headers:
+        #         f.write(f'\nHeaders: {headers}')
+        #     if params:
+        #         f.write(f'\nParams: {params}')
+        #     if data:
+        #         f.write(f'\nData: {data}')
+
+
+        # Делаем запрос используя оригинальную функцию
         response = func(*args, **kwargs)
 
+        # Логируем параметры ответа
         if isinstance(response, tuple):
             status, result = response
         else:
             status, result = response.status_code, response.text
 
         with open('log.txt', 'a') as f:
-            f.write(f'\n--- Request ---\n')
-            if hasattr(response, 'request'):
+            f.write(f'\n--- Response ---\n')
+            if hasattr(response, 'Response'):
                 f.write(f'Method: {response.request.method}\n')
             f.write(f'Status: {status}\n')
             f.write(f'Response: {result}\n')
+
         return response
+
     return wrapper
 
+# функция, которая логирует параметры запроса. С помощью нее вывожу Request. Применяю внутри API методов.
+def append_to_file(filename: str, content: str) -> None:
+    with open(filename, 'a') as file:
+        file.write(content)
 
 
 class PetFriends:
@@ -43,14 +69,17 @@ class PetFriends:
             'email': email,
             'password': passwd,
         }
-        res = requests.get(self.base_url+'api/key', headers=headers)
+        url = self.base_url+'api/key'
+        res = requests.get(url, headers=headers)
         status = res.status_code
         result = ""
+        append_to_file('log.txt', f'\n--- Request ---\nURL: {url}, \nHeaders: {headers}')
         try:
             result = res.json()
         except json.decoder.JSONDecodeError:
             result = res.text
         return status, result
+
 
     @log_api
     def get_list_of_pets(self, auth_key: json, filter: str = "") -> json:
@@ -62,9 +91,11 @@ class PetFriends:
         headers = {'auth_key': auth_key['key']}
         filter = {'filter': filter}
 
-        res = requests.get(self.base_url + 'api/pets', headers=headers, params=filter)
+        url = self.base_url + 'api/pets'
+        res = requests.get(url, headers=headers, params=filter)
         status = res.status_code
         result = ""
+        append_to_file('log.txt', f'\n--- Request ---\nURL: {url}, \nHeaders: {headers}, \nParams: {filter}')
         try:
             result = res.json()
         except json.decoder.JSONDecodeError:
@@ -84,9 +115,11 @@ class PetFriends:
         headers = {'auth_key': auth_key['key']}
         file = {'pet_photo': (pet_photo, open(pet_photo, 'rb'), 'image/jpeg')}
 
-        res = requests.post(self.base_url + 'api/pets', headers=headers, data=data, files=file)
+        url = self.base_url + 'api/pets'
+        res = requests.post(url, headers=headers, data=data, files=file)
         status = res.status_code
         result = ''
+        append_to_file('log.txt', f'\n--- Request ---\nURL: {url}, \nHeaders: {headers}, \nData: {data}')
         try:
             result = res.json()
         except json.decoder.JSONDecodeError:
@@ -99,9 +132,11 @@ class PetFriends:
         и результат в формате JSON с текстом уведомления о успешном удалении"""
         headers = {'auth_key': auth_key['key']}
 
-        res = requests.delete(self.base_url + f'api/pets/{pet_id}', headers=headers)
+        url = self.base_url + f'api/pets/{pet_id}'
+        res = requests.delete(url, headers=headers)
         status = res.status_code
         result = ''
+        append_to_file('log.txt', f'\n--- Request ---\nURL: {url}, \nHeaders: {headers}')
         try:
             result = res.json()
         except json.decoder.JSONDecodeError:
@@ -118,10 +153,12 @@ class PetFriends:
             'animal_type': animal_type,
             'age': age
         }
-
-        res = requests.put(self.base_url + f'api/pets/{pet_id}', headers=headers, data=data)
+        url = self.base_url + f'api/pets/{pet_id}'
+        res = requests.put(url, headers=headers, data=data)
         status = res.status_code
         result = ''
+
+        append_to_file('log.txt', f'\n--- Request ---\nURL: {url}, \nHeaders: {headers}, \nData: {data}')
         try:
             result = res.json()
         except json.decoder.JSONDecodeError:
@@ -140,9 +177,12 @@ class PetFriends:
             'age': age
         }
 
-        res = requests.post(self.base_url + 'api/create_pet_simple', headers=headers, data=data)
+        url = self.base_url + 'api/create_pet_simple'
+        res = requests.post(url, headers=headers, data=data)
         status = res.status_code
         result = ''
+
+        append_to_file('log.txt', f'\n--- Request ---\nURL: {url}, \nHeaders: {headers}, \nData: {data}')
         try:
             result = res.json()
         except json.decoder.JSONDecodeError:
@@ -156,10 +196,12 @@ class PetFriends:
         headers = {'auth_key': auth_key['key']}
         file = {'pet_photo': (pet_photo, open(pet_photo, 'rb'), 'image/jpeg')}
 
-        res = requests.post(self.base_url + f'api/pets/set_photo/{pet_id}',
-                            headers=headers, files=file)
+        url = self.base_url + f'api/pets/set_photo/{pet_id}'
+        res = requests.post(url, headers=headers, files=file)
         status = res.status_code
         result = ''
+
+        append_to_file('log.txt', f'\n--- Request ---\nURL: {url}, \nHeaders: {headers}')
         try:
             result = res.json()
         except json.decoder.JSONDecodeError:
